@@ -31,12 +31,12 @@ def commit_changes(message: str = "This is a commit") -> bool:
         ["git", "push"], check=True, capture_output=True, text=True
     )
 
-    # TODO: Make a better check for invalid returncode
-    if (
-        add_command.returncode or commit_command.returncode or push_command.returncode
-    ) != 0:
-        print("COMMAND FAILED")
+    my_list = [add_command, commit_command, push_command]
+    for command in my_list:
+        if command.returncode != 0:
+            print(f"Command: {command.args} result -> {command.stderr}")
         return False
+
     return True
 
 
