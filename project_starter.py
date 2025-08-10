@@ -5,6 +5,7 @@ import subprocess
 import os
 from dotenv import load_dotenv
 
+# TODO: IMPLEMENT CUSTOM ERROR MESSAGES, TO SPECIFY WHAT WENT WRONG!
 # TODO: CHANGE THE NAME OF THE FILE AND FUNCTION FOR SOMETHING CLEARER
 from create_folders_files import create_folders_and_files
 
@@ -35,7 +36,7 @@ def commit_changes(message: str = "This is a commit") -> bool:
     for command in my_list:
         if command.returncode != 0:
             print(f"Command: {command.args} result -> {command.stderr}")
-        return False
+            return False
 
     return True
 
@@ -58,6 +59,8 @@ data = {
     "is_template": True,
 }
 
+print("SENDING a POST request")
+print("")
 response = requests.post(url, headers=header, json=data)
 
 ##### GIT CLONE
@@ -68,29 +71,32 @@ if response.status_code == 201:
     print("Repository Created successfully!")
     data = response.json()
     repo_owner = data["owner"]["login"]
-    clone_url = data["clone_url"]
+    ssh_url = data["ssh_url"]
+    repo_name = data["name"]
     print(repo_owner)
+    print(f"URL: {ssh_url}")
+    print("")
+    try:
+        print("Attempting to clone repository!")
+        subprocess_response = subprocess.run(
+            ["git", "clone", ssh_url], check=True, capture_output=True, text=True
+        )
+        if subprocess_response.returncode == 0:
+            print(f"Repository named: {repo_name} - was cloned successfully")
+
+            os.chdir(repo_name)
+            ##### CREATING FOLDER STRUCTURE AND FILES
+            create_folders_and_files()
+
+            #### COMMIT CHANGES TO REPO
+            commit_response = commit_changes()
+            print(f"Commit response: {commit_response}")
+
+    except subprocess.CalledProcessError as error:
+        print(f"Command failed to run: {error.returncode}")
+        print(f"Command error Response: {error.stderr}")
+        print(f"Command error Response: {error.output}")
 else:
+    data = response.json()
     print(f"Error creating repository. Status code: {response.status_code}")
-    print(response.status_code)
-
-try:
-    print("Attempting to run a command on the CLI")
-    subprocess_response = subprocess.run(
-        ["git", "clone", clone_url], check=True, capture_output=True, text=True
-    )
-    if subprocess_response.returncode == 0:
-        print("Repository was cloneed successfully")
-
-except subprocess.CalledProcessError as error:
-    print(f"Command failed to run: {error.returncode}")
-    print(f"Command error Response: {error.stderr}")
-    print(f"Command error Response: {error.output}")
-
-##### CREATING FOLDER STRUCTURE AND FILES
-create_folders_and_files()
-
-#### COMMIT CHANGES TO REPO
-
-commit_response = commit_changes()
-print(f"Commit response: {commit_response}")
+    print(data["errors"])
