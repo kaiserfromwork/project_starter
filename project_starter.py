@@ -4,10 +4,8 @@ import requests
 import subprocess
 import os
 from dotenv import load_dotenv
-
-# TODO: IMPLEMENT CUSTOM ERROR MESSAGES, TO SPECIFY WHAT WENT WRONG!
-# TODO: CHANGE THE NAME OF THE FILE AND FUNCTION FOR SOMETHING CLEARER
-from create_folders_files import create_folders_and_files
+from pathlib import Path
+import create_files
 
 
 # TODO: Move this to a separate file that takes a string with name of the key you need from the .env file
@@ -41,6 +39,8 @@ def commit_changes(message: str = "This is a commit") -> bool:
     return True
 
 
+script_dir = Path(__file__).resolve().parent
+print(f"DIRECTORY -> {script_dir}")
 token = get_github_key()
 
 # POST Requests
@@ -86,7 +86,11 @@ if response.status_code == 201:
 
             os.chdir(repo_name)
             ##### CREATING FOLDER STRUCTURE AND FILES
-            create_folders_and_files()
+            create_files.create_github_workflow(script_dir)
+            create_files.create_git_ignore_file(script_dir)
+            create_files.create_project_config_file(script_dir)
+            create_files.create_requirements_file()
+            create_files.create_readme_file(script_dir)
 
             #### COMMIT CHANGES TO REPO
             commit_response = commit_changes()
