@@ -1,20 +1,12 @@
 #!/home/kaiser/projects/project_starter/.venv/bin/python
 
-import requests
 import subprocess
 import os
-from dotenv import load_dotenv
 from pathlib import Path
 import create_files
-
-
-# TODO: Move this to a separate file that takes a string with name of the key you need from the .env file
-def get_github_key() -> str | None:
-    load_dotenv()
-    GITHUB_TOKEN = os.getenv("GITHUB_PAT")
-
-    return GITHUB_TOKEN
-
+from load_env import get_github_key
+from github_api import post_request
+import json
 
 # TODO: Remove default value, this is only for testing:
 def commit_changes(message: str = "This is a commit") -> bool:
@@ -38,69 +30,45 @@ def commit_changes(message: str = "This is a commit") -> bool:
 
     return True
 
+#TODO: Get user input for this variables
+token = "test"
+repository_name = "test "
+description = "test"
 
-script_dir = Path(__file__).resolve().parent
-print(f"DIRECTORY -> {script_dir}")
-token = get_github_key()
+response = post_request(token, repository_name, description)
+data = response.json()
 
-# POST Requests
-url = "https://api.github.com/user/repos"
-
-header = {
-    "accept": "application/vnd.github+json",
-    "Authorization": f"Bearer {token}",
-    "X-GitHub-Api-Version": "2022-11-28",
-}
-data = {
-    "name": "Hello World",
-    "description": "This is my first automated repository creation",
-    "homepage": "https://github.com",
-    "private": False,
-    "is_template": True,
-}
-
-print("SENDING a POST request")
+repo_owner = data["owner"]["login"]
+ssh_url = data["ssh_url"]
+repo_name = data["name"]
+print(repo_owner)
+print(f"URL: {ssh_url}")
 print("")
-response = requests.post(url, headers=header, json=data)
+try:
+    print("Attempting to clone repository!")
+    subprocess_response = subprocess.run(
+        ["git", "clone", ssh_url], check=True, capture_output=True, text=True
+    )
+    if subprocess_response.returncode == 0:
+        print(f"Repository named: {repo_name} - was cloned successfully")
 
-##### GIT CLONE
+        os.chdir(repo_name)
+        ##### CREATING FOLDER STRUCTURE AND FILES
+        create_files.create_github_workflow(script_dir)
+        create_files.create_git_ignore_file(script_dir)
+        create_files.create_project_config_file(script_dir)
+        create_files.create_requirements_file()
+        create_files.create_readme_file(script_dir)
 
-clone_url = ""  # TODO: Remove this when refactoring the code
+        #### COMMIT CHANGES TO REPO
+        commit_response = commit_changes()
+        print(f"Commit response: {commit_response}")
 
-if response.status_code == 201:
-    print("Repository Created successfully!")
-    data = response.json()
-    repo_owner = data["owner"]["login"]
-    ssh_url = data["ssh_url"]
-    repo_name = data["name"]
-    print(repo_owner)
-    print(f"URL: {ssh_url}")
-    print("")
-    try:
-        print("Attempting to clone repository!")
-        subprocess_response = subprocess.run(
-            ["git", "clone", ssh_url], check=True, capture_output=True, text=True
-        )
-        if subprocess_response.returncode == 0:
-            print(f"Repository named: {repo_name} - was cloned successfully")
-
-            os.chdir(repo_name)
-            ##### CREATING FOLDER STRUCTURE AND FILES
-            create_files.create_github_workflow(script_dir)
-            create_files.create_git_ignore_file(script_dir)
-            create_files.create_project_config_file(script_dir)
-            create_files.create_requirements_file()
-            create_files.create_readme_file(script_dir)
-
-            #### COMMIT CHANGES TO REPO
-            commit_response = commit_changes()
-            print(f"Commit response: {commit_response}")
-
-    except subprocess.CalledProcessError as error:
-        print(f"Command failed to run: {error.returncode}")
-        print(f"Command error Response: {error.stderr}")
-        print(f"Command error Response: {error.output}")
+except subprocess.CalledProcessError as error:
+    print(f"Command failed to run: {error.returncode}")
+    print(f"Command error Response: {error.stderr}")
+    print(f"Command error Response: {error.output}")
 else:
-    data = response.json()
-    print(f"Error creating repository. Status code: {response.status_code}")
-    print(data["errors"])
+data = response.json()
+print(f"Error creating repository. Status code: {response.status_code}")
+print(data["errors"])
