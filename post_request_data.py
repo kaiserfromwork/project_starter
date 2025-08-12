@@ -56,7 +56,7 @@ def get_post_request_data() -> tuple | None:
             else:
                 print("Your repository was set to Private.\n")
 
-        elif rename_repo.lower() not in repo_name.lower():
+        elif rename_repo.lower() != repo_name.lower():
             print("Failed to confirm repository name.\nPlease, try again.\n")
             continue
         else:
