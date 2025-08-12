@@ -1,74 +1,65 @@
 #!/home/kaiser/projects/project_starter/.venv/bin/python
 
+import requests
 import subprocess
 import os
-from pathlib import Path
 import create_files
-from load_env import get_github_key
-from github_api import post_request
-import json
 
-# TODO: Remove default value, this is only for testing:
-def commit_changes(message: str = "This is a commit") -> bool:
-    add_command = subprocess.run(
-        ["git", "add", "."], check=True, capture_output=True, text=True
-    )
-    # TODO: ADD THE OPTION TO CREATE A CUSOTM MESSAGE
-    message = "This is a commit!"
-    commit_command = subprocess.run(
-        ["git", "commit", "-m", message], check=True, capture_output=True, text=True
-    )
-    push_command = subprocess.run(
-        ["git", "push"], check=True, capture_output=True, text=True
-    )
+from post_request_data import get_post_request_data
+from commit_changes import commit_changes
+from pathlib import Path
 
-    my_list = [add_command, commit_command, push_command]
-    for command in my_list:
-        if command.returncode != 0:
-            print(f"Command: {command.args} result -> {command.stderr}")
-            return False
+current_dir = Path(__file__).resolve().parent
+url, header, data = get_post_request_data()
 
-    return True
-
-#TODO: Get user input for this variables
-token = "test"
-repository_name = "test "
-description = "test"
-
-response = post_request(token, repository_name, description)
-data = response.json()
-
-repo_owner = data["owner"]["login"]
-ssh_url = data["ssh_url"]
-repo_name = data["name"]
-print(repo_owner)
-print(f"URL: {ssh_url}")
-print("")
 try:
-    print("Attempting to clone repository!")
-    subprocess_response = subprocess.run(
-        ["git", "clone", ssh_url], check=True, capture_output=True, text=True
-    )
-    if subprocess_response.returncode == 0:
-        print(f"Repository named: {repo_name} - was cloned successfully")
+    print("SENDING a POST request")
+    print("")
+    response = requests.post(url, headers=header, json=data)
 
-        os.chdir(repo_name)
-        ##### CREATING FOLDER STRUCTURE AND FILES
-        create_files.create_github_workflow(script_dir)
-        create_files.create_git_ignore_file(script_dir)
-        create_files.create_project_config_file(script_dir)
-        create_files.create_requirements_file()
-        create_files.create_readme_file(script_dir)
+    ##### GIT CLONE
+    if response.status_code == 201:
+        print("Repository Created successfully!")
+        data = response.json()
+        repo_owner = data["owner"]["login"]
+        ssh_url = data["ssh_url"]
+        repo_name = data["name"]
+        print(f"username: {repo_owner}")
+        print(f"Repo name: {repo_name}")
+        print(f"URL: {ssh_url}")
+        print("")
 
-        #### COMMIT CHANGES TO REPO
-        commit_response = commit_changes()
-        print(f"Commit response: {commit_response}")
+        try:
+            print("Attempting to clone repository!")
+            git_clone_response = subprocess.run(
+                ["git", "clone", ssh_url], check=True, capture_output=True, text=True
+            )
+            if git_clone_response.returncode == 0:
+                print(f"Repository named: {repo_name} - was cloned successfully")
+                print("")
 
-except subprocess.CalledProcessError as error:
-    print(f"Command failed to run: {error.returncode}")
-    print(f"Command error Response: {error.stderr}")
-    print(f"Command error Response: {error.output}")
-else:
-data = response.json()
-print(f"Error creating repository. Status code: {response.status_code}")
-print(data["errors"])
+                os.chdir(repo_name)
+                ##### CREATING FOLDER STRUCTURE AND FILES
+                create_files.create_git_ignore_file(current_dir)
+                create_files.create_github_workflow(current_dir)
+                create_files.create_project_config_file(current_dir)
+                create_files.create_requirements_file()
+                create_files.create_readme_file(current_dir)
+
+                #### COMMIT CHANGES TO REPO
+                commit_response = commit_changes()
+                print(f"Commit response: {commit_response}")
+
+        except subprocess.CalledProcessError as error:
+            print(f"Command failed to run: {error.returncode}")
+            print(f"Command error Response: {error.stderr}")
+            print(f"Command error Response: {error.output}")
+
+    else:
+        data = response.json()
+        print(f"Error creating repository. Status code: {response.status_code}")
+        print(data["errors"])
+
+except Exception as error:
+    print("An error occurred while making a POST Request")
+    print(f"Error -> {error}")
