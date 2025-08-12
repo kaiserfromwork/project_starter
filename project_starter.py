@@ -52,7 +52,11 @@ while True:
 
                     #### COMMIT CHANGES TO REPO
                     commit_response = commit_changes()
-                    print(f"Commit response: {commit_response}")
+                    if commit_response:
+                        print("Changes committed succesfully.\n")
+                        break
+                    else:
+                        print("An error occurred while commiting to repository.\n")
 
             except subprocess.CalledProcessError as error:
                 print(f"Command failed to run: {error.returncode}")
@@ -72,7 +76,6 @@ while True:
             data = response.json()
             print(f"Error creating repository. Status code: {response.status_code}")
             print(data["errors"])
-
     except Exception as error:
         print("An error occurred while making a POST Request")
         print(f"Error -> {error}")
