@@ -18,15 +18,13 @@ def automate_repository():
         if post_request_data:
             url, header, data = post_request_data
         else:
-            print("Invalid GitHub Personal Access Key (PAT).\n")
+            print("Invalid data. Cannot complete POST request.\n")
             break
 
         try:
-            print("SENDING a POST request")
-            print("")
+            print("SENDING a POST request.\n")
             response = requests.post(url, headers=header, json=data)
 
-            ##### GIT CLONE
             if response.status_code == 201:
                 print("Repository Created successfully!")
                 data = response.json()
@@ -35,8 +33,7 @@ def automate_repository():
                 repo_name = data["name"]
                 print(f"username: {repo_owner}")
                 print(f"Repo name: {repo_name}")
-                print(f"URL: {ssh_url}")
-                print("")
+                print(f"URL: {ssh_url}.\n")
 
                 try:
                     print("Attempting to clone repository!")
@@ -48,23 +45,20 @@ def automate_repository():
                     )
                     if git_clone_response.returncode == 0:
                         print(
-                            f"Repository named: {repo_name} - was cloned successfully"
+                            f"Repository named - {repo_name} - was cloned successfully.\n"
                         )
-                        print("")
-
                         os.chdir(repo_name)
-                        ##### CREATING FOLDER STRUCTURE AND FILES
+
                         create_files.create_git_ignore_file(current_dir)
                         create_files.create_github_workflow(current_dir)
                         create_files.create_project_config_file(current_dir)
                         create_files.create_requirements_file()
                         create_files.create_readme_file(current_dir)
 
-                        #### COMMIT CHANGES TO REPO
                         commit_response = commit_changes()
                         if commit_response:
                             print("Changes committed succesfully.\n")
-                            break
+                            return
                         else:
                             print("An error occurred while commiting to repository.\n")
 
@@ -82,7 +76,7 @@ def automate_repository():
                     continue
                 else:
                     print("Aborting script!!!!")
-                    break
+                    return
 
             else:
                 data = response.json()
