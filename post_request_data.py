@@ -17,10 +17,15 @@ def check_repo_name(repo_name: str) -> tuple:
     return (is_valid, validation_errors)
 
 
-def get_post_request_data() -> tuple:
-    token = get_github_key()
+def get_post_request_data() -> tuple | None:
     repo_name = ""
     rename_repo = ""
+    is_private = True
+
+    token = get_github_key()
+    if not token:
+        print("PAT is not valid!")
+        return None
 
     while True:
         repo_name = input("Please, enter a name for your repository. (No spaces)\n")
@@ -34,23 +39,23 @@ def get_post_request_data() -> tuple:
         print(f"\nYour repository name is: {repo_name}")
         rename_repo = input("Please, confirm your repository name.\n")
 
-        if rename_repo.lower() in repo_name.lower():
+        if rename_repo.lower() == repo_name.lower():
             description = input("Please, enter a description for the repository.\n")
 
             if description == "":
                 description = "This is a repository"
                 print("Your description was auto-generated\n")
 
-            is_private = input("Would you like to your repository to be private?\n")
-            if is_private.lower() in ("no", "n"):
+            make_private = input("Would you like to your repository to be private?\n")
+            if make_private.lower() in ("no", "n"):
                 is_private = False
                 print("Your repository was set to Public.\n")
-            elif is_private.lower() in ("yes", "y"):
+            elif make_private.lower() in ("yes", "y"):
                 is_private = True
                 print("Your repository was set to Private.\n")
             else:
-                is_private = True
                 print("Your repository was set to Private.\n")
+
         elif rename_repo.lower() not in repo_name.lower():
             print("Failed to confirm repository name.\nPlease, try again.\n")
             continue

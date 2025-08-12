@@ -2,7 +2,7 @@ import shutil
 from pathlib import Path
 
 
-def create_github_workflow(dir_path: Path):
+def create_github_workflow(dir_path: Path) -> None:
     github_workflow = dir_path / "configs" / "python_ci_config.yml"
     destination_file = Path(".github/workflows/python_ci.yml")
 
@@ -21,7 +21,7 @@ def create_github_workflow(dir_path: Path):
         print(f"An error occurred: {error}")
 
 
-def create_readme_file(dir_path: Path):
+def create_readme_file(dir_path: Path) -> None:
     config_file = dir_path / "configs" / "readme_config.md"
     destination_file = "README.md"
     try:
@@ -40,7 +40,7 @@ def create_readme_file(dir_path: Path):
         print(f"An error occurred: {error}")
 
 
-def create_requirements_file():
+def create_requirements_file() -> None:
     destination_file = "requirements.txt"
     try:
         print(f"Creating {destination_file} file")
@@ -57,7 +57,7 @@ def create_requirements_file():
         print(f"An error occurred: {error}")
 
 
-def create_git_ignore_file(dir_path: Path):
+def create_git_ignore_file(dir_path: Path) -> None:
     git_ignore_config = dir_path / "configs" / "git_ignore_config.txt"
     destinatio_file = ".gitignore"
     try:
@@ -74,7 +74,7 @@ def create_git_ignore_file(dir_path: Path):
         print(f"An error occurred: {error}")
 
 
-def create_project_config_file(dir_path: Path):
+def create_project_config_file(dir_path: Path) -> None:
     project_config_source = dir_path / "configs" / "project_config_file.toml"
     destination_file = "pyproject_config.toml"
 
