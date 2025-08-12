@@ -3,6 +3,8 @@ from load_env import get_github_key
 
 def check_repo_name(repo_name: str) -> tuple:
     validation_errors = []
+    is_valid = True
+
     if len(repo_name) > 100:
         validation_errors.append(
             "Repository name cannnot be longer than 100 characters"
@@ -20,6 +22,7 @@ def check_repo_name(repo_name: str) -> tuple:
 def get_post_request_data() -> tuple | None:
     repo_name = ""
     rename_repo = ""
+    description = ""
     is_private = True
 
     token = get_github_key()
@@ -34,7 +37,7 @@ def get_post_request_data() -> tuple | None:
             print("One or more errors occurred when naming the repository")
             print(result[1])
             print("")
-            continue
+            break
 
         print(f"\nYour repository name is: {repo_name}")
         rename_repo = input("Please, confirm your repository name.\n")
@@ -56,12 +59,12 @@ def get_post_request_data() -> tuple | None:
             else:
                 print("Your repository was set to Private.\n")
 
-        elif rename_repo.lower() not in repo_name.lower():
+        elif rename_repo.lower() != repo_name.lower():
             print("Failed to confirm repository name.\nPlease, try again.\n")
-            continue
+            break
         else:
             print("Invalid input. Please, try again.\n")
-            continue
+            break
 
         break
 
@@ -76,7 +79,7 @@ def get_post_request_data() -> tuple | None:
         "name": f"{repo_name}",
         "description": f"{description}",
         "homepage": "https://github.com",
-        "private": f"{is_private}",
+        "private": {is_private},
         "is_template": True,
     }
 

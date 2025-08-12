@@ -2,23 +2,23 @@ import subprocess
 
 
 def commit_changes() -> bool:
-    add_command = subprocess.run(
-        ["git", "add", "."], check=True, capture_output=True, text=True
-    )
-    commit_command = subprocess.run(
-        ["git", "commit", "-m", "Initial commit"],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    push_command = subprocess.run(
-        ["git", "push"], check=True, capture_output=True, text=True
-    )
+    try:
+        subprocess.run(["git", "add", "."], check=True, capture_output=True, text=True)
+        subprocess.run(
+            ["git", "commit", "-m", "Initial commit"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        subprocess.run(["git", "push"], check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as error:
+        print("An error occurred while commiting changes.\n")
+        print(f"Error: {error}")
+        return False
 
-    my_list = [add_command, commit_command, push_command]
-    for command in my_list:
-        if command.returncode != 0:
-            print(f"Command: {command.args} result -> {command.stderr}")
-            return False
+    except Exception as error:
+        print("An unexpected error occurred while trying to commit to repository.\n")
+        print(f"Error: {error}.")
+        return False
 
     return True
