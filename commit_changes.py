@@ -2,7 +2,7 @@ import subprocess
 
 
 def commit_changes() -> bool:
-    message = "This is a commit"
+    message = input("Please, enter your commit message.\n")
 
     add_command = subprocess.run(
         ["git", "add", "."], check=True, capture_output=True, text=True
