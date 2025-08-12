@@ -76,7 +76,7 @@ def get_post_request_data() -> tuple | None:
         "name": f"{repo_name}",
         "description": f"{description}",
         "homepage": "https://github.com",
-        "private": f"{is_private}",
+        "private": {is_private},
         "is_template": True,
     }
 
