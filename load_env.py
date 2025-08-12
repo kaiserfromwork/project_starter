@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os
 
 
-def get_github_key():
+def get_github_key() -> str | None:
     load_dotenv()
-    GITHUB_TOKEN = os.getenv("GITHUB_PAT")
-    return GITHUB_TOKEN
+    token = os.getenv("GITHUB_PAT")
+    return token if token else None

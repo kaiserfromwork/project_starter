@@ -3,7 +3,6 @@ from load_env import get_github_key
 
 def check_repo_name(repo_name: str) -> tuple:
     validation_errors = []
-    is_valid = True
 
     if len(repo_name) > 100:
         validation_errors.append(
@@ -11,11 +10,8 @@ def check_repo_name(repo_name: str) -> tuple:
         )
     if " " in repo_name:
         validation_errors.append("Blank space is not allowed when naming a repository")
-
-    if not validation_errors:
-        is_valid = True
-    else:
-        is_valid = False
+    # If repository name is valid, list of errors will be empty. So is_valid is the opposite bool
+    is_valid = not validation_errors
     return (is_valid, validation_errors)
 
 
@@ -32,12 +28,12 @@ def get_post_request_data() -> tuple | None:
 
     while True:
         repo_name = input("Please, enter a name for your repository. (No spaces)\n")
-        result = check_repo_name(repo_name)
-        if not result[0]:
+        is_valid, validation_errors = check_repo_name(repo_name)
+        if not is_valid:
             print("One or more errors occurred when naming the repository")
-            print(result[1])
+            print(validation_errors)
             print("")
-            break
+            continue
 
         print(f"\nYour repository name is: {repo_name}")
         rename_repo = input("Please, confirm your repository name.\n")
@@ -61,10 +57,11 @@ def get_post_request_data() -> tuple | None:
 
         elif rename_repo.lower() != repo_name.lower():
             print("Failed to confirm repository name.\nPlease, try again.\n")
-            break
+            continue
+
         else:
             print("Invalid input. Please, try again.\n")
-            break
+            continue
 
         break
 
@@ -79,7 +76,7 @@ def get_post_request_data() -> tuple | None:
         "name": f"{repo_name}",
         "description": f"{description}",
         "homepage": "https://github.com",
-        "private": {is_private},
+        "private": is_private,
         "is_template": True,
     }
 
