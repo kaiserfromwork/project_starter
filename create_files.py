@@ -3,6 +3,9 @@ from pathlib import Path
 
 
 def create_github_workflow(dir_path: Path) -> None:
+    """
+    Creates directory and file for GitHub Actions setup on given path.
+    """
     github_workflow = dir_path / "configs" / "python_ci_config.yml"
     destination_file = Path(".github/workflows/python_ci.yml")
 
@@ -22,6 +25,9 @@ def create_github_workflow(dir_path: Path) -> None:
 
 
 def create_readme_file(dir_path: Path) -> None:
+    """
+    Creates an empty README.md file on given path.
+    """
     config_file = dir_path / "configs" / "readme_config.md"
     destination_file = "README.md"
     try:
@@ -41,6 +47,9 @@ def create_readme_file(dir_path: Path) -> None:
 
 
 def create_requirements_file() -> None:
+    """
+    Creates an empty requirement.txt file on the current directory.
+    """
     destination_file = "requirements.txt"
     try:
         print(f"Creating {destination_file} file")
@@ -58,6 +67,9 @@ def create_requirements_file() -> None:
 
 
 def create_git_ignore_file(dir_path: Path) -> None:
+    """
+    Creates .gitignore file on given path and populates it with specified configuration.
+    """
     git_ignore_config = dir_path / "configs" / "git_ignore_config.txt"
     destinatio_file = ".gitignore"
     try:
@@ -75,6 +87,9 @@ def create_git_ignore_file(dir_path: Path) -> None:
 
 
 def create_project_config_file(dir_path: Path) -> None:
+    """
+    Creates a configuration file for the project on given path and populates it with specified documentation.
+    """
     project_config_source = dir_path / "configs" / "project_config_file.toml"
     destination_file = "pyproject_config.toml"
 

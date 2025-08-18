@@ -11,6 +11,9 @@ from pathlib import Path
 
 
 def automate_repository():
+    """
+    Automates the creation of a repository given user input.
+    """
     current_dir = Path(__file__).resolve().parent
 
     while True:

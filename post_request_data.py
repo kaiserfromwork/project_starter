@@ -2,6 +2,9 @@ from load_env import get_github_key
 
 
 def check_repo_name(repo_name: str) -> tuple:
+    """
+    Checks if given string is a valid repository name.
+    """
     validation_errors = []
 
     if len(repo_name) > 100:
@@ -16,6 +19,9 @@ def check_repo_name(repo_name: str) -> tuple:
 
 
 def get_post_request_data() -> tuple | None:
+    """
+    Returns a valid format of components for a HTTP POST request using User input.
+    """
     repo_name = ""
     rename_repo = ""
     description = ""

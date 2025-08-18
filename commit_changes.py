@@ -2,6 +2,9 @@ import subprocess
 
 
 def commit_changes() -> bool:
+    """
+    Commit local changes and push them to the remote repository.
+    """
     try:
         subprocess.run(["git", "add", "."], check=True, capture_output=True, text=True)
         subprocess.run(
